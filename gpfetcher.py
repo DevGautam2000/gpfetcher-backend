@@ -128,20 +128,18 @@ def handle_pagination(username, url):
                          license_, stars, forked_by)
 
         try:
-            if soup.find(attrs={"data-test-selector": "pagination"}):
-                div = soup.find(
-                    attrs={"data-test-selector": "pagination"}).select("a")
-
-                for a in div:
-                    if a.text == "Next":
-                        url = a['href']
+            if soup.find('a', {"class": "next_page"}):
+                a = soup.find('a', {"class": "next_page"})
+                if a.text == "Next":
+                    url = "https://github.com"+a['href']
                 errors.clear()
                 handle_pagination(username, url)
+
         except Exception as e:
             errors.append(e)
     except Exception as e:
         errors.append(err_msg_network)
-        exit(0)
+        return {}
 
 
 def loader(url, username):
@@ -159,7 +157,6 @@ def loader(url, username):
         for i in tqdm(range(int(total_projects))):
             time.sleep(0.2)
     except Exception as e:
-        print(e)
         errors.append(e)
 
 
@@ -183,10 +180,10 @@ def scrape(_username):
     if len(projectInfo) == 1 and len(projectInfo['FORKED']) == 0:
         if err_msg_network in errors:
             print("\n", err_msg_network.upper(), "\n")
-            return
+            return projectInfo
         print("Note: Check for the conditions below-\n\n1. Username does not exist.\n2. Username is of an organization.\n\n")
-        return
+        return projectInfo
 
     print(
-        f"Done!")
+        f"Done! checkout your {_username}-projects.json file at the root of this directory\n")
     return projectInfo
